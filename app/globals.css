@@ -1,0 +1,370 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Lenis (scroll suave del ScrollStack): estilos recomendados */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* "Reducir movimiento" (por ejemplo, Windows con los efectos de animación apagados):
+   no se apaga todo, se cambian los desplazamientos por fundidos suaves. Ver el final del archivo. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* ── Animaciones de la landing ─────────────────────────────────────────── */
+
+:root {
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Verde del kiosco, para resaltar */
+  --brand: #2f9e5f;
+  --marker: rgb(47 158 95 / 0.2);
+}
+
+/* Entrada al cargar la página (no depende de JS) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+.intro {
+  animation: rise 0.9s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Subrayado dibujado bajo una palabra del título */
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.draw-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.9s var(--ease-out-soft) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Burbujas que flotan alrededor de la captura */
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+.float {
+  animation: float 5s ease-in-out infinite;
+  animation-delay: var(--f, 0ms);
+}
+
+/* Aparición al hacer scroll (la activa components/reveal.tsx) */
+.reveal {
+  opacity: 0;
+  translate: 0 28px;
+  filter: blur(6px);
+  transition:
+    opacity 0.8s var(--ease-out-soft),
+    translate 0.8s var(--ease-out-soft),
+    filter 0.8s var(--ease-out-soft),
+    scale 0.8s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal[data-visible='true'] {
+  opacity: 1;
+  translate: 0 0;
+  filter: blur(0);
+}
+
+.reveal-zoom {
+  scale: 0.94;
+}
+
+.reveal-zoom[data-visible='true'] {
+  scale: 1;
+}
+
+/* Resaltador de los títulos: se dibuja al aparecer y se repite al elegir la sección */
+.marker {
+  background-image: linear-gradient(transparent 62%, var(--marker) 62%, var(--marker) 92%, transparent 92%);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-size 1s var(--ease-out-soft) 0.35s;
+}
+
+[data-visible='true'] .marker {
+  background-size: 100% 100%;
+}
+
+@keyframes marker-sweep {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+@keyframes section-pop {
+  0% {
+    translate: 0 0;
+  }
+  30% {
+    translate: 0 -6px;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+/* Transición al cambiar de sección (la maneja lib/section-nav.ts) */
+#main-content {
+  transition:
+    opacity 0.24s ease,
+    translate 0.24s ease,
+    filter 0.24s ease;
+}
+
+#main-content[data-leaving] {
+  opacity: 0;
+  translate: 0 -16px;
+  filter: blur(6px);
+}
+
+@keyframes section-enter {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+#main-content[data-entering] {
+  animation: section-enter 0.7s var(--ease-out-soft) both;
+}
+
+[data-flash='true'] .marker {
+  animation: marker-sweep 0.9s var(--ease-out-soft);
+}
+
+[data-flash='true'] h2 {
+  animation: section-pop 0.7s var(--ease-out-soft);
+}
+
+/* Las vistas previas de las tarjetas de funciones se animan en bucle (components/feature-play.tsx) */
+@custom-variant card-on {
+  &:is(:where(.group[data-play='true']) *) {
+    @slot;
+  }
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), 'Geist', 'Geist Fallback';
+  --font-serif: var(--font-fraunces), 'Fraunces', serif;
+  --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ── Con "reducir movimiento": solo fundidos, sin desplazamientos ni loops ── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  #main-content[data-entering] {
+    animation-name: fade-in;
+  }
+
+  .reveal,
+  .reveal-zoom,
+  #main-content[data-leaving] {
+    translate: none;
+    scale: none;
+    filter: none;
+  }
+
+  [data-flash='true'] h2 {
+    animation: none;
+  }
+
+  .float,
+  .animate-marquee,
+  .animate-ping {
+    animation: none;
+  }
+}

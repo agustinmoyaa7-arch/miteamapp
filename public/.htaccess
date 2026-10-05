@@ -1,0 +1,27 @@
+# Configuración para Hostinger (Apache)
+
+# Siempre por https
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+
+# Sin "www": www.miteam.online → miteam.online
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+# Página de error propia
+ErrorDocument 404 /404.html
+
+# Los .js, .css y fuentes salen de _next/static con nombre único: caché de un año.
+# Las imágenes pueden cambiar con el mismo nombre: caché de una semana.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(png|jpg|jpeg|svg|webp)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
